@@ -17,10 +17,16 @@ namespace excel_analysis
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
+            var neededSheets = req.Headers.GetValues("x-sheets").First();
 
             using (var package = new ExcelPackage(await req.Content.ReadAsStreamAsync()))
             {
-                package.Workbook.Worksheets.Delete(1);
+                foreach (var sheet in package.Workbook.Worksheets) {
+                    if (!neededSheets.Contains(sheet.Name))  {
+                        package.Workbook.Worksheets.Delete(sheet.Name);
+                    }
+                }
+
                 MemoryStream _stream = new MemoryStream();
                 package.SaveAs(_stream);
                 var res = req.CreateResponse();
