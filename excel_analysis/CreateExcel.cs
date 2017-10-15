@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -21,9 +22,15 @@ namespace excel_analysis
 
             using (var package = new ExcelPackage(await req.Content.ReadAsStreamAsync()))
             {
-                foreach (var sheet in package.Workbook.Worksheets) {
-                    if (!neededSheets.Contains(sheet.Name))  {
-                        package.Workbook.Worksheets.Delete(sheet.Name);
+                var sheetNames = new List<string>();
+                foreach (var sheet in package.Workbook.Worksheets)
+                {
+                    sheetNames.Add(sheet.Name);
+                }
+
+                foreach (var sheet in sheetNames) {
+                    if (!neededSheets.Contains(sheet))  {
+                        package.Workbook.Worksheets.Delete(sheet);
                     }
                 }
 
